@@ -54,14 +54,7 @@ uvicorn main:app --port 8000 --reload
 
 Copy `.env.example` to `.env`:
 ```env
-GOOGLE_API_KEY="your-google-custom-search-api-key"
-GOOGLE_CSE_ID="your-programmable-search-engine-id"
-ANTHROPIC_API_KEY="your-anthropic-api-key"
-AGENT_SECRET="kaye_agent_secure_token"
-SUPABASE_URL="https://your-project.supabase.co"
-SUPABASE_ANON_KEY="your-anon-key"
-SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
-VITE_MOCK_MODE="true"
+
 ```
 
 ---
