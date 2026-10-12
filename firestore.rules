@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-deny all unhandled paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Bootstrapped Admin: user email from AI Studio runtime + admin document lookup
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'hehealpha247@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // 1. User Profiles & Sessions
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+
+      // User Bookmarks Subcollection
+      match /bookmarks/{alumniId} {
+        allow read, write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      }
+    }
+
+    // 2. Self-Registered Alumni Profiles
+    match /alumni/{alumniId} {
+      allow read: if true;
+      allow create: if isSignedIn() && (
+        incoming().userId == request.auth.uid || isAdmin()
+      );
+      allow update, delete: if isSignedIn() && (
+        existing().userId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // 3. Mentorship Connection Requests
+    match /connection_requests/{requestId} {
+      allow create: if isSignedIn() && (
+        incoming().fromUserId == request.auth.uid
+      );
+      allow read: if isSignedIn() && (
+        resource.data.fromUserId == request.auth.uid ||
+        resource.data.toAlumniId == request.auth.uid ||
+        isAdmin()
+      );
+      allow update: if isSignedIn() && (
+        resource.data.toAlumniId == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 4. Opt-Out Suppression Ledger
+    // Public insertion allowed so anyone can submit their LinkedIn URL to opt out immediately
+    match /opt_outs/{optOutId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 5. User Feedbacks
+    // Public creation allowed so students can submit feedback to developer @nothing
+    match /feedbacks/{feedbackId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 6. Admins Collection
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

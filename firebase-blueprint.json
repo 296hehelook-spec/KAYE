@@ -1,0 +1,124 @@
+{
+  "entities": {
+    "userProfile": {
+      "title": "UserProfile",
+      "description": "User account and session state",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "enum": ["student", "alumni", "admin"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "email", "role"]
+    },
+    "alumniProfile": {
+      "title": "AlumniProfile",
+      "description": "Verified or self-registered alumni record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "headline": { "type": "string", "maxLength": 250 },
+        "currentRole": { "type": "string", "maxLength": 100 },
+        "company": { "type": "string", "maxLength": 100 },
+        "location": { "type": "string", "maxLength": 100 },
+        "college": { "type": "string", "maxLength": 150 },
+        "passoutYear": { "type": "number" },
+        "branch": { "type": "string", "maxLength": 100 },
+        "linkedinUrl": { "type": "string", "maxLength": 250 },
+        "source": { "type": "string", "enum": ["agent", "self_registered"] },
+        "isAvailableForMentorship": { "type": "boolean" },
+        "shortBio": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "college", "passoutYear", "branch", "linkedinUrl"]
+    },
+    "bookmark": {
+      "title": "Bookmark",
+      "description": "User saved alumni bookmark with private guidance note",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "alumniProfileId": { "type": "string" },
+        "note": { "type": "string", "maxLength": 500 },
+        "alumni": { "type": "object" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "alumniProfileId"]
+    },
+    "connectionRequest": {
+      "title": "ConnectionRequest",
+      "description": "Consent-based mentorship connection request",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fromUserId": { "type": "string" },
+        "fromUserName": { "type": "string", "maxLength": 100 },
+        "fromUserEmail": { "type": "string", "format": "email" },
+        "toAlumniId": { "type": "string" },
+        "toAlumniName": { "type": "string", "maxLength": 100 },
+        "message": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["pending", "accepted", "declined"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "fromUserId", "toAlumniId", "message", "status"]
+    },
+    "optOut": {
+      "title": "OptOut",
+      "description": "Suppressed profile excluded from all searches",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "linkedinUrl": { "type": "string", "maxLength": 250 },
+        "email": { "type": "string", "format": "email" },
+        "reason": { "type": "string", "maxLength": 250 },
+        "requestedAt": { "type": "string" }
+      },
+      "required": ["id", "linkedinUrl"]
+    },
+    "feedback": {
+      "title": "Feedback",
+      "description": "User review submitted to developer @nothing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "collegeOrRole": { "type": "string", "maxLength": 100 },
+        "rating": { "type": "number" },
+        "category": { "type": "string", "enum": ["feature", "bug", "mentorship", "general"] },
+        "message": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "rating", "category", "message"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/userProfile" },
+      "description": "User profile state"
+    },
+    "/users/{userId}/bookmarks/{alumniId}": {
+      "schema": { "$ref": "#/entities/bookmark" },
+      "description": "Saved alumni profiles per user"
+    },
+    "/alumni/{alumniId}": {
+      "schema": { "$ref": "#/entities/alumniProfile" },
+      "description": "Self-registered alumni records"
+    },
+    "/connection_requests/{requestId}": {
+      "schema": { "$ref": "#/entities/connectionRequest" },
+      "description": "Student-to-alumni connection inquiries"
+    },
+    "/opt_outs/{optOutId}": {
+      "schema": { "$ref": "#/entities/optOut" },
+      "description": "Permanent privacy exclusion ledger"
+    },
+    "/feedbacks/{feedbackId}": {
+      "schema": { "$ref": "#/entities/feedback" },
+      "description": "User reviews and developer suggestions"
+    }
+  }
+}

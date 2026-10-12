@@ -1,0 +1,6 @@
+{
+  "name": "Kaye - AlumniFinder",
+  "description": "Tactile neumorphic alumni search engine connecting students with college alumni for mentorship, career guidance, and referrals through public profiles and consent-first networking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
